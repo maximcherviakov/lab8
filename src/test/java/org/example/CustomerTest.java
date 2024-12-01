@@ -2,101 +2,104 @@ package org.example;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class CustomerTest {
 
   @Test
-  public void testWithdrawPersonWithNormalAccount() throws Exception {
+  public void testWithdrawPersonWithNormalAccount() {
     Account account = getAccountByTypeAndMoney(false, 34.0);
     Customer customer = getPersonCustomer(account);
     customer.withdraw(10, "EUR");
-    assertThat(account.getMoney(), is(24.0));
+    assertEquals(24.0, account.getMoney(), 0.001);
   }
 
   @Test
-  public void testWithdrawPersonWithNormalAccountAndOverdraft() throws Exception {
+  public void testWithdrawPersonWithNormalAccountAndOverdraft() {
     Account account = getAccountByTypeAndMoney(false, -10.0);
     Customer customer = getPersonCustomer(account);
     customer.withdraw(10, "EUR");
-    assertThat(account.getMoney(), is(-22.0));
+    assertEquals(-22.0, account.getMoney(), 0.001);
   }
 
   @Test
-  public void testWithdrawPersonWithPremiumAccount() throws Exception {
+  public void testWithdrawPersonWithPremiumAccount() {
     Account account = getAccountByTypeAndMoney(true, 34.0);
     Customer customer = getPersonCustomer(account);
     customer.withdraw(10, "EUR");
-    assertThat(account.getMoney(), is(24.0));
+    assertEquals(24.0, account.getMoney(), 0.001);
   }
 
   @Test
-  public void testWithdrawPersonWithPremiumAccountAndOverdraft() throws Exception {
+  public void testWithdrawPersonWithPremiumAccountAndOverdraft() {
     Account account = getAccountByTypeAndMoney(true, -10.0);
     Customer customer = getPersonCustomer(account);
     customer.withdraw(10, "EUR");
-    assertThat(account.getMoney(), is(-21.0));
+    assertEquals(-21.0, account.getMoney(), 0.001);
   }
 
   @Test
-  public void testWithdrawCompanyWithNormalAccount() throws Exception {
+  public void testWithdrawCompanyWithNormalAccount() {
     Account account = getAccountByTypeAndMoney(false, 34);
     Customer customer = getCompanyCustomer(account);
     customer.withdraw(10, "EUR");
-    assertThat(account.getMoney(), is(24.0));
+    assertEquals(24.0, account.getMoney(), 0.001);
   }
 
   @Test
-  public void testWithdrawCompanyWithNormalAccountAndOverdraft() throws Exception {
+  public void testWithdrawCompanyWithNormalAccountAndOverdraft() {
     Account account = getAccountByTypeAndMoney(false, -10);
     Customer customer = getCompanyCustomer(account);
     customer.withdraw(10, "EUR");
-    assertThat(account.getMoney(), is(-21.0));
+    assertEquals(-21.0, account.getMoney(), 0.001);
   }
 
   @Test
-  public void testWithdrawCompanyWithPremiumAccount() throws Exception {
+  public void testWithdrawCompanyWithPremiumAccount() {
     Account account = getAccountByTypeAndMoney(true, 34);
     Customer customer = getCompanyCustomer(account);
     customer.withdraw(10, "EUR");
-    assertThat(account.getMoney(), is(24.0));
+    assertEquals(24.0, account.getMoney(), 0.001);
   }
 
   @Test
-  public void testWithdrawCompanyWithPremiumAccountAndOverdraft() throws Exception {
+  public void testWithdrawCompanyWithPremiumAccountAndOverdraft() {
     Account account = getAccountByTypeAndMoney(true, -10);
     Customer customer = getCompanyCustomer(account);
     customer.withdraw(10, "EUR");
-    assertThat(account.getMoney(), is(-20.25));
+    assertEquals(-20.25, account.getMoney(), 0.001);
   }
 
   @Test
-  public void testPrintCustomerDaysOverdrawn() throws Exception {
+  public void testPrintCustomerDaysOverdrawn() {
     Customer customer = getPersonWithAccount(false);
-    assertThat(customer.printCustomerDaysOverdrawn(),
-        is("danix dan Account: IBAN: RO023INGB434321431241, Days Overdrawn: 9"));
+    assertEquals("danix dan Account: IBAN: RO023INGB434321431241, Days Overdrawn: 9",
+        customer.printCustomerDaysOverdrawn()
+    );
   }
 
   @Test
-  public void testPrintCustomerMoney() throws Exception {
+  public void testPrintCustomerMoney() {
     Customer customer = getPersonWithAccount(false);
-    assertThat(customer.printCustomerMoney(),
-        is("danix dan Account: IBAN: RO023INGB434321431241, Money: 34.0"));
+    assertEquals("danix dan Account: IBAN: RO023INGB434321431241, Money: 34.0",
+        customer.printCustomerMoney()
+    );
   }
 
   @Test
-  public void testPrintCustomerAccountNormal() throws Exception {
+  public void testPrintCustomerAccountNormal() {
     Customer customer = getPersonWithAccount(false);
-    assertThat(customer.printCustomerAccount(),
-        is("Account: IBAN: RO023INGB434321431241, Money: 34.0, Account type: normal"));
+    assertEquals("Account: IBAN: RO023INGB434321431241, Money: 34.0, Account type: normal",
+        customer.printCustomerAccount()
+    );
   }
 
   @Test
-  public void testPrintCustomerAccountPremium() throws Exception {
+  public void testPrintCustomerAccountPremium() {
     Customer customer = getPersonWithAccount(true);
-    assertThat(customer.printCustomerAccount(),
-        is("Account: IBAN: RO023INGB434321431241, Money: 34.0, Account type: premium"));
+    assertEquals("Account: IBAN: RO023INGB434321431241, Money: 34.0, Account type: premium",
+        customer.printCustomerAccount()
+    );
   }
 
   private Customer getPersonWithAccount(boolean premium) {
