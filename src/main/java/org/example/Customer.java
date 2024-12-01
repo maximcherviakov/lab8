@@ -6,7 +6,7 @@ public class Customer {
   private String surname;
   private String email;
   private CustomerType customerType;
-  private Account account;
+  private final Account account;
   private double companyOverdraftDiscount = 1;
 
   public Customer(String name, String surname, String email, CustomerType customerType,
@@ -28,55 +28,25 @@ public class Customer {
   }
 
   public void withdraw(double sum, String currency) {
+    validateCurrency(currency);
+    processWithdrawal(sum);
+  }
+
+  private void validateCurrency(String currency) {
     if (!account.getCurrency().equals(currency)) {
-      throw new RuntimeException("Can't extract withdraw " + currency);
+      throw new RuntimeException("Can't withdraw " + currency);
     }
-    if (account.getType().isPremium()) {
-      switch (customerType) {
-        case COMPANY:
-          // we are in overdraft
-          if (account.getMoney() < 0) {
-            // 50 percent discount for overdraft for premium account
-            account.setMoney((account.getMoney() - sum)
-                - sum * account.overdraftFee() * companyOverdraftDiscount / 2);
-          } else {
-            account.setMoney(account.getMoney() - sum);
-          }
-          break;
-        case PERSON:
+  }
 
-          // we are in overdraft
-          if (account.getMoney() < 0) {
-            account.setMoney((account.getMoney() - sum) - sum * account.overdraftFee());
-          } else {
-            account.setMoney(account.getMoney() - sum);
-          }
-          break;
-      }
+  private void processWithdrawal(double sum) {
+    WithdrawalStrategy withdrawalStrategy = createWithdrawalStrategy();
+    withdrawalStrategy.withdraw(account, sum);
+  }
 
-    } else {
-
-      switch (customerType) {
-        case COMPANY:
-          // we are in overdraft
-          if (account.getMoney() < 0) {
-            // no discount for overdraft for not premium account
-            account.setMoney((account.getMoney() - sum)
-                - sum * account.overdraftFee() * companyOverdraftDiscount);
-          } else {
-            account.setMoney(account.getMoney() - sum);
-          }
-          break;
-        case PERSON:
-          // we are in overdraft
-          if (account.getMoney() < 0) {
-            account.setMoney((account.getMoney() - sum) - sum * account.overdraftFee());
-          } else {
-            account.setMoney(account.getMoney() - sum);
-          }
-          break;
-      }
-    }
+  private WithdrawalStrategy createWithdrawalStrategy() {
+    return account.getType().isPremium()
+        ? new PremiumWithdrawalStrategy(customerType)
+        : new StandardWithdrawalStrategy(customerType);
   }
 
   public String getName() {
@@ -120,5 +90,55 @@ public class Customer {
   public String printCustomerAccount() {
     return "Account: IBAN: " + account.getIban() + ", Money: "
         + account.getMoney() + ", Account type: " + account.getType();
+  }
+
+  interface WithdrawalStrategy {
+    void withdraw(Account account, double sum);
+  }
+
+  // Strategy interface for withdrawal
+  class PremiumWithdrawalStrategy implements WithdrawalStrategy {
+    private final CustomerType customerType;
+
+    public PremiumWithdrawalStrategy(CustomerType customerType) {
+      this.customerType = customerType;
+    }
+
+    @Override
+    public void withdraw(Account account, double sum) {
+      if (account.getMoney() < 0) {
+        double overdraftFee = sum * account.overdraftFee();
+        double finalAmount = customerType == CustomerType.COMPANY
+            ? overdraftFee * companyOverdraftDiscount / 2
+            : overdraftFee;
+
+        account.setMoney(account.getMoney() - sum - finalAmount);
+      } else {
+        account.setMoney(account.getMoney() - sum);
+      }
+    }
+  }
+
+  // Strategy for Standard Accounts
+  class StandardWithdrawalStrategy implements WithdrawalStrategy {
+    private final CustomerType customerType;
+
+    public StandardWithdrawalStrategy(CustomerType customerType) {
+      this.customerType = customerType;
+    }
+
+    @Override
+    public void withdraw(Account account, double sum) {
+      if (account.getMoney() < 0) {
+        double overdraftFee = sum * account.overdraftFee();
+        double finalAmount = customerType == CustomerType.COMPANY
+            ? overdraftFee * companyOverdraftDiscount
+            : overdraftFee;
+
+        account.setMoney(account.getMoney() - sum - finalAmount);
+      } else {
+        account.setMoney(account.getMoney() - sum);
+      }
+    }
   }
 }
