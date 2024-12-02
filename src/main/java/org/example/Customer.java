@@ -27,13 +27,13 @@ public class Customer {
     this.companyOverdraftDiscount = companyOverdraftDiscount;
   }
 
-  public void withdraw(double sum, String currency) {
+  public void withdraw(double sum, Currency currency) {
     validateCurrency(currency);
     processWithdrawal(sum);
   }
 
-  private void validateCurrency(String currency) {
-    if (!account.getCurrency().equals(currency)) {
+  private void validateCurrency(Currency currency) {
+    if (!account.getBalance().getCurrency().equals(currency)) {
       throw new RuntimeException("Can't withdraw " + currency);
     }
   }
@@ -44,7 +44,7 @@ public class Customer {
   }
 
   private WithdrawalStrategy createWithdrawalStrategy() {
-    return account.getType().isPremium()
+    return account.isPremium()
         ? new PremiumWithdrawalStrategy(customerType)
         : new StandardWithdrawalStrategy(customerType);
   }
@@ -75,21 +75,18 @@ public class Customer {
 
   public String printCustomerDaysOverdrawn() {
     String fullName = name + " " + surname + " ";
-    String accountDescription =
-        "Account: IBAN: " + account.getIban() + ", Days Overdrawn: " + account.getDaysOverdrawn();
+    String accountDescription = account.getCustomerDaysOverdrawnInfo();
     return fullName + accountDescription;
   }
 
   public String printCustomerMoney() {
     String fullName = name + " " + surname + " ";
-    String accountDescription = "";
-    accountDescription += "Account: IBAN: " + account.getIban() + ", Money: " + account.getMoney();
+    String accountDescription = account.getCustomerMoneyInfo();
     return fullName + accountDescription;
   }
 
   public String printCustomerAccount() {
-    return "Account: IBAN: " + account.getIban() + ", Money: "
-        + account.getMoney() + ", Account type: " + account.getType();
+    return account.getCustomerAccountInfo();
   }
 
   interface WithdrawalStrategy {
@@ -106,15 +103,15 @@ public class Customer {
 
     @Override
     public void withdraw(Account account, double sum) {
-      if (account.getMoney() < 0) {
+      if (account.getBalance().getAmount() < 0) {
         double overdraftFee = sum * account.overdraftFee();
         double finalAmount = customerType == CustomerType.COMPANY
             ? overdraftFee * companyOverdraftDiscount / 2
             : overdraftFee;
 
-        account.setMoney(account.getMoney() - sum - finalAmount);
+        account.getBalance().setAmount(account.getBalance().getAmount() - sum - finalAmount);
       } else {
-        account.setMoney(account.getMoney() - sum);
+        account.getBalance().setAmount(account.getBalance().getAmount() - sum);
       }
     }
   }
@@ -129,15 +126,15 @@ public class Customer {
 
     @Override
     public void withdraw(Account account, double sum) {
-      if (account.getMoney() < 0) {
+      if (account.getBalance().getAmount() < 0) {
         double overdraftFee = sum * account.overdraftFee();
         double finalAmount = customerType == CustomerType.COMPANY
             ? overdraftFee * companyOverdraftDiscount
             : overdraftFee;
 
-        account.setMoney(account.getMoney() - sum - finalAmount);
+        account.getBalance().setAmount(account.getBalance().getAmount() - sum - finalAmount);
       } else {
-        account.setMoney(account.getMoney() - sum);
+        account.getBalance().setAmount(account.getBalance().getAmount() - sum);
       }
     }
   }

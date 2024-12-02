@@ -3,18 +3,16 @@ package org.example;
 public class Account {
 
   private String iban;
-  private AccountType type;
-  private int daysOverdrawn;
-  private double money;
-  private String currency;
+  private boolean isPremium;
+  private final int daysOverdrawn;
+  private Money balance;
   private Customer customer;
 
-  public Account(AccountType type, int daysOverdrawn) {
+  public Account(boolean isPremium, int daysOverdrawn) {
     super();
-    this.type = type;
+    this.isPremium = isPremium;
     this.daysOverdrawn = daysOverdrawn;
   }
-
 
   public double bankcharge() {
     double result = 4.5;
@@ -23,7 +21,7 @@ public class Account {
   }
 
   private double overdraftCharge() {
-    if (type.isPremium()) {
+    if (isPremium) {
       double result = 10;
       if (getDaysOverdrawn() > 7) {
         result += (getDaysOverdrawn() - 7) * 1.0;
@@ -35,11 +33,24 @@ public class Account {
   }
 
   public double overdraftFee() {
-    if (type.isPremium()) {
+    if (isPremium) {
       return 0.10;
     } else {
       return 0.20;
     }
+  }
+
+  public String getCustomerDaysOverdrawnInfo() {
+    return "Account: IBAN: " + getIban() + ", Days Overdrawn: " + getDaysOverdrawn();
+  }
+
+  public String getCustomerMoneyInfo() {
+    return "Account: IBAN: " + getIban() + ", Money: " + getBalance().getAmount();
+  }
+
+  public String getCustomerAccountInfo() {
+    return "Account: IBAN: " + getIban() + ", Money: "
+        + getBalance().getAmount() + ", Account type: " + (isPremium ? "premium" : "normal");
   }
 
   public int getDaysOverdrawn() {
@@ -54,14 +65,6 @@ public class Account {
     this.iban = iban;
   }
 
-  public void setMoney(double money) {
-    this.money = money;
-  }
-
-  public double getMoney() {
-    return money;
-  }
-
   public Customer getCustomer() {
     return customer;
   }
@@ -70,22 +73,23 @@ public class Account {
     this.customer = customer;
   }
 
-
-  public AccountType getType() {
-    return type;
+  public boolean isPremium() {
+    return isPremium;
   }
 
+  public void setPremium(boolean premium) {
+    isPremium = premium;
+  }
 
   public String printCustomer() {
     return customer.getName() + " " + customer.getEmail();
   }
 
-
-  public String getCurrency() {
-    return currency;
+  public Money getBalance() {
+    return balance;
   }
 
-  public void setCurrency(String currency) {
-    this.currency = currency;
+  public void setBalance(Money balance) {
+    this.balance = balance;
   }
 }

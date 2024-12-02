@@ -40,12 +40,10 @@ public class AccountTest {
   }
 
   private Account getNormalAccount() {
-    AccountType premium = new AccountType(false);
-    return new Account(premium, 9);
+    return new Account(false, 9);
   }
 
   private Account getPremiumAccount(int daysOverdrawn) {
-    AccountType normal = new AccountType(true);
-    return new Account(normal, daysOverdrawn);
+    return new Account(true, daysOverdrawn);
   }
 }
